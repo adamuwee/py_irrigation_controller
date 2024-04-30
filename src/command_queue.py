@@ -1,5 +1,7 @@
 from queue import Queue
-import src.zone as zone
+import zone
+import datetime
+import json
 
 class CommandQueue:
     def __init__(self):
@@ -21,3 +23,12 @@ class CommandQueue:
     def empty_queue(self):
         while not self.queue.empty():
             self.queue.get()
+    
+    def to_list(self):
+        return list(self.queue.queue)
+    
+    def total_command_time(self) -> datetime.timedelta:
+        total_time = datetime.timedelta()
+        for command in self.to_list():
+            total_time += command.run_time
+        return total_time

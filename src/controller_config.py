@@ -2,12 +2,15 @@
 Config file I/O for static app parameters
 '''
 import json
+import jsonpickle
+
 from collections import defaultdict
 from os.path import exists
 import os
 import copy
 
 import logger
+import zone
 
 class ConfigManager:
 
@@ -53,14 +56,27 @@ class ConfigManager:
         self.active_config['mqtt_broker']['connection']['host_port'] = 1883
 
         # All Topics
-        self.active_config['base_topic'] = '/IrrigationController'
+        self.active_config['base_topic'] = '/InGroundIrrigation'
         
         # Publish Topics - System
         self.active_config['subscribe']['command_queue'] = 'command_queue'
         self.active_config['publish']['queue_status'] = 'queue_status'   
         
         # System Config  
-        self.active_config['delay_between_commands_secs'] = 60        
+        self.active_config['delay_between_commands_secs'] = 5     
+        
+        # Zones
+        zones = list()
+        zones.append(zone.CreateZoneRecord('Zone 1 - Front Yard', 1, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone1/doStatus', 1200))
+        zones.append(zone.CreateZoneRecord('Zone 2 - Front Yard', 2, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone2/doStatus', 1200))
+        zones.append(zone.CreateZoneRecord('Zone 3 - Driveway',   3, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone3/doStatus', 600))
+        zones.append(zone.CreateZoneRecord('Zone 4 - Schrubs',    4, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone4/doStatus', 600))
+        zones.append(zone.CreateZoneRecord('Zone 5 - Back Yard',  5, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone5/doStatus', 1200))
+        zones.append(zone.CreateZoneRecord('Zone 6 - Back Yard',  6, 'ioThinx_4510/write/Digital-Out-1@IrriSys_Zone6/doStatus', 1200))
+        #self.active_config['zones'] = zones
+        for z in zones:
+            self.active_config['zones'][z.zone_name] = z
+        
     '''
     Load a config from disk by config name
     '''
@@ -70,7 +86,8 @@ class ConfigManager:
         try:
             with open(full_config_file_path, 'r') as file:
                 json_string = file.read()
-                self.active_config = json.loads(json_string)
+                #self.active_config = json.loads(json_string)
+                self.active_config = jsonpickle.decode(json_string)
         except FileNotFoundError:
             # Create default config
             self.set_as_default_config()
@@ -133,8 +150,6 @@ class ConfigManager:
         full_file_path = os.path.join(os.getcwd(), self._CONFIG_FOLDER, full_file_name)
         return full_file_path
 
-
-        
     '''
     Recursively convert all defaultdicts to dicts; useful for JSON serialization
     '''
@@ -158,7 +173,8 @@ class ConfigManager:
                 config_dict[key] = self._unwrap_defaultdict(value)
             else:
                 config_dict[key] = value
-        json_string = json.dumps(config_dict)
+        #json_string = json.dumps(config_dict)
+        json_string = jsonpickle.encode(config_dict)
         return json_string
 
 def tree(): return defaultdict(tree)

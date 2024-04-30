@@ -64,8 +64,11 @@ class MqttClient:
         self._local_topic_list.append(full_topic)
         self._logger.write(self._log_key, f"Subscribed to {full_topic}", logger.MessageLevel.INFO)
         
-    def publish(self, topic, payload) -> mqtt.MQTTMessageInfo:
-        full_topic = self._append_base(topic)
+    def publish(self, topic, payload, append_base=True) -> mqtt.MQTTMessageInfo:
+        if append_base:
+            full_topic = self._append_base(topic)
+        else:
+            full_topic = topic
         '''Publish a payload to a given topic'''
         return self._mqtt_client.publish(full_topic, payload)
     

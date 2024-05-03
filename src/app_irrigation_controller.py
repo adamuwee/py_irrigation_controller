@@ -110,12 +110,12 @@ class IrrigationController:
 
             elif self._state == self._STATE_STOPPING_COMMAND:
                 ''' Stop a command - set the zone state to active and start the timer'''
-                self.logger.write(self._LOG_KEY, f"Stopping valve {zone_command.zone.zone_name}...", logger.MessageLevel.ERROR)
+                self.logger.write(self._LOG_KEY, f"Stopping valve {zone_command.zone.zone_name}...", logger.MessageLevel.INFO)
                 command_success = self._set_zone_state(zone_command, False)
                 self._command_pause_timer = elapsed_time.ElapsedTime(datetime.timedelta(seconds=self.config.active_config['delay_between_commands_secs']))
                 if command_success:
                     self._change_state(self._STATE_PAUSE_BETWEEN_COMMANDS)
-                    self.logger.write(self._LOG_KEY, f"{zone_command.zone.zone_name} stopped.", logger.MessageLevel.ERROR)
+                    self.logger.write(self._LOG_KEY, f"{zone_command.zone.zone_name} stopped.", logger.MessageLevel.INFO)
                 else:
                     self._change_state(self._STATE_ERROR)
                 zone_command = None

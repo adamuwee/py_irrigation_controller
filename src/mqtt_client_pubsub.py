@@ -99,10 +99,6 @@ class MqttClient:
             return self._mqtt_client.disconnect()
         return 0
         
-    def _on_connect_callback(self, client, userdata, flags, rc) -> None:
-        '''Internal callback for a new connection to the MQTT broker'''
-        self._logger.write(self._log_key, f"Connected with result code {rc}", logger.MessageLevel.INFO)
-
     def _on_publish_callback(self, client, userdata, mid) -> None:  
         '''Internal callback for a new message published to the MQTT broker'''
         self._logger.write(self._log_key, f"Published message ID: {mid}", logger.MessageLevel.INFO)

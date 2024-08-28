@@ -59,7 +59,7 @@ class IrrigationController:
                                       self._new_message_callback, 
                                       self._publish_message_callback)
         self.mqtt_client.start()
-        self.mqtt_client.subscribe(self.config.active_config['subscribe']['command_queue'])
+        self._subscribe_to_command_queue()
 
     '''Blocking Run - Run the Irrigation Controller'''
     def run(self):
@@ -135,6 +135,10 @@ class IrrigationController:
             time.sleep(self._LOOP_DELAY_MS / 1000)
             
     ''' -------------------- Private Class Members -------------------- '''
+    def _subscribe_to_command_queue(self):
+        self.logger.write(self._LOG_KEY, f"Subscribing to Command Queue ({self.config.active_config['subscribe']['command_queue']})", logger.MessageLevel.INFO)
+        self.mqtt_client.subscribe(self.config.active_config['subscribe']['command_queue'])
+
     def _change_state(self, new_state : int):
         '''Change the state of the Irrigation Controller'''
         self._state = new_state
@@ -166,7 +170,6 @@ class IrrigationController:
         json_dict['remaining_pause_seconds'] = remaining_pause_seconds
         
         json_dict['last_command'] = self._last_command_received
-        #json_str = json.dumps(json_dict)
         json_str = jsonpickle.encode(json_dict, unpicklable=False)
         self.mqtt_client.publish(self.config.active_config['publish']['queue_status'], json_str)
         
